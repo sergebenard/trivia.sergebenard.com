@@ -1,0 +1,52 @@
+@tailwind base;
+
+progress[value] {
+    /* Reset the default appearance */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    /* Get rid of default border in Firefox. */
+    border: none;
+
+    /* Dimensions */
+    /*   width: 250px; */
+    height: 20px;
+}
+
+progress[value]::-moz-progress-bar {
+    background: rgba(0, 0, 0, .5);
+
+    border-radius: 2px;
+    background-size: 35px 20px, 100% 100%, 100% 100%;
+}
+
+.blink {
+    animation: blink .75s steps(5, start) infinite;
+    -webkit-animation: blink .75s steps(5, start) infinite;
+}
+
+@keyframes blink {
+    to {
+        visibility: hidden;
+    }
+}
+
+@-webkit-keyframes blink {
+    to {
+        visibility: hidden;
+    }
+}
+
+.btnHeaderShadow {
+    text-shadow: 2px 2px 0px #000000;
+}
+
+.btnTextShadow {
+    text-shadow: 4px 4px 0px #000000;
+}
+
+
+@tailwind components;
+
+@tailwind utilities;
