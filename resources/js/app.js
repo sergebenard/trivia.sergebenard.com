@@ -95,6 +95,7 @@ const app = new Vue({
 				});
 		},
 		
+		
 		setupJeopardyRound: function() {
 			
 			console.info( 'Inside setupJeopardyRound function.' );
