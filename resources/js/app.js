@@ -19,7 +19,7 @@ window.Vue = require('vue');
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
 
-Vue.component('example-component', require('./components/ExampleComponent.vue').default);
+import panelAnswerComponent from './components/panel_answer.vue';
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -28,7 +28,10 @@ Vue.component('example-component', require('./components/ExampleComponent.vue').
  */
 
 const app = new Vue({
-    el: '#app',
+	el: '#app',
+	components: {
+		'panel-answer': panelAnswerComponent,
+	},
 	data: {
 		answerCountdownSeconds: 0,
 		answerCountdownSecondsDefault: 12,
@@ -51,9 +54,11 @@ const app = new Vue({
 
 		showBuzzerBlinkers: false,
 
-		showLoading: false,
+        showLoading: false,
+        
+        currentRowCount: 0,
 		
-		round: 1,
+		roundType: 0,
 		
 		// View Types are:
 		// 0 - Start Up
@@ -90,7 +95,9 @@ const app = new Vue({
 
 					this.showLoading = false;
 					// return response.data;
-					this.columns = response.data;
+                    this.columns = response.data;
+                    
+                    this.fixAnswerValue();
 
 				});
 		},
@@ -100,19 +107,26 @@ const app = new Vue({
 			
 			console.info( 'Inside setupJeopardyRound function.' );
 
-			console.info( 'Making a request for first round of Jeopardy...' );
-			response = this.getNewRoundColumns( 0 );
+            console.info( 'Making a request for first round of Jeopardy...' );
+
+			this.getNewRoundColumns( this.roundType );
 
 			// this.columns = response;
 
 		},
 		
 		setupDoubleJeopardyRound: function() {
-			this.getNewRoundColumns( 1 );
+
+            this.roundType = 1;
+            
+			this.getNewRoundColumns( this.roundType );
 		},
 		
 		setupFinalJeopardyRound: function() {
-			this.getNewRoundColumns( 2 );
+            
+            this.roundType = 2;
+            
+            this.getNewRoundColumns( this.roundType );
 		},
 		
 		setupNewRoundView: function( columnsData ) {
@@ -137,7 +151,7 @@ const app = new Vue({
 		
 		setupRoundTimeUp: function() {
 			
-		},
+        },
 		
 		clickAnswer: function(horizontal, vertical) {
 			
@@ -188,39 +202,91 @@ const app = new Vue({
 			console.log('Unable to Change View Type to ' + viewType);
 			return false;
 			
-		},
+        },
 
-		setAnswerValue: function( ) {
+		getAnswerValue: function( row ) {
+            
+            // Null this out if we're at Final Jeopardy!
+            if( this.roundType >= 2 ) {
+                console.warn('roundType at or beyond Final Jeopardy!; returning with error.')
+                return -1;
+            }
 
-		},
+            var ret = 0;
+
+            switch ( row ) {
+                case 0:
+                    ret = 200 * (this.roundType + 1);
+                    break;
+                case 1:
+                    ret = 400 * (this.roundType + 1);
+                    break;
+                case 2:
+                    ret = 600 * (this.roundType + 1);
+                    break;
+                case 3:
+                    ret = 800 * (this.roundType + 1);
+                    break;
+                case 4:
+                    ret = 1000 * (this.roundType + 1);
+                    break;
+            }
+            
+            return ret;
+            
+        },
+        
+        fixAnswerValue: function() {
+
+            // console.info( this.columns );
+            
+            console.info( 'Columns: ' + this.columns.length );
+            
+            let currentRow = 0,
+                currentColumn = 0;
+
+            this.columns.forEach( function( column, vue ) {
+                currentRow = 0;
+
+                column.forEach( function( answer, vue ) {
+                    
+                    answer.answer_value = this.getAnswerValue( currentRow );
+
+                    currentRow++;
+
+                }, this, currentRow, currentColumn)
+
+                currentColumn++;
+
+                
+            }, this, currentRow, currentColumn);
+        },
 		
-		changeRound: function( roundType = null ) {
-			if ( roundType !== null ) {
+		changeRound: function( roundType ) {
 				
-				this.setRound( roundType );
-				
-				this.setUpRound();
-				
-				console.log('Changed round type to ' + roundType);
-				return true;
-			}
-
-			return false;
+            this.setRound( roundType );
+            
+            this.setUpRound();
+            
+            console.log('Changed round type to ' + roundType);
+            return true;
+        
 		},
 		
 		nextRound: function() {
 			if ( this.round < 2 ) {
-				return this.round + 1;
-			}
+				return this.roundType + 1;
+            }
+            
 			return 0;
 		},
 
 		setRound: function( roundType ) {
-			this.round = roundType;
+			this.roundType = roundType;
 		},
 		
 		setUpRound: function() {
-			switch( this.round ) {
+			switch( this.roundType ) {
 				case 0:
 					// Jeopardy! round
 					this.setupJeopardyRound();
@@ -233,7 +299,8 @@ const app = new Vue({
 					// Final Jeopardy! round
 					this.setupFinalJeopardyRound();
 					break;
-			}
+            }
+            
 		},
 
 		countDownTimer: function( countDown ) {
