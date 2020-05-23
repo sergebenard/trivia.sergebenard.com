@@ -87,7 +87,11 @@
                             
                         </div> --}}
                         <panel-answer v-for="(answer, answerIndex) in column"
-                            v-bind:answer="answer"></panel-answer>
+                            v-bind:key="answer.question"
+                            v-bind:answer="answer"
+                            v-bind:answer-index="answerIndex"
+                            v-bind:column-index="columnIndex"
+                            v-on:show-answer="setupSelectAnswerView( columnIndex, answerIndex )"></panel-answer>
                     </div>
                 </div>
             </div>

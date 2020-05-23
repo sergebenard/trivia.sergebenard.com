@@ -111,8 +111,6 @@ const app = new Vue({
 
 			this.getNewRoundColumns( this.roundType );
 
-			// this.columns = response;
-
 		},
 		
 		setupDoubleJeopardyRound: function() {
@@ -257,7 +255,6 @@ const app = new Vue({
                 }, this, currentRow, currentColumn)
 
                 currentColumn++;
-
                 
             }, this, currentRow, currentColumn);
         },

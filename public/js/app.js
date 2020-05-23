@@ -1921,14 +1921,20 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
-  data: function data() {
-    return {// answer: null
-    };
-  },
   props: {
-    answer: Object
+    answer: Object,
+    columnIndex: Number,
+    answerIndex: Number
+  },
+  methods: {
+    clicked: function clicked() {
+      console.info('Clicked on button Col: ' + this.columnIndex + '; Row: ' + this.answerIndex);
+
+      if (!this.answer.answered_correctly) {
+        this.$emit('showAnswer', this.columnIndex, this.answerIndex);
+      }
+    }
   }
 });
 
@@ -19537,13 +19543,13 @@ var render = function() {
     "button",
     {
       staticClass:
-        "px-2 py-3 flex justify-center items-center\n        bg-blue-700 font-bold text-6xl border border-black",
+        "px-2 py-3 flex justify-center items-center\r\n    bg-blue-700 font-bold text-6xl border border-black",
       class: [
         _vm.answer.answered_correctly !== 0
           ? "cursor-default"
           : "text-yellow-400 btnTextShadow"
       ],
-      attrs: { disabled: [_vm.answer.answered_correctly !== 0] }
+      on: { click: _vm.clicked }
     },
     [
       _c(
@@ -31843,7 +31849,7 @@ var app = new Vue({
     setupJeopardyRound: function setupJeopardyRound() {
       console.info('Inside setupJeopardyRound function.');
       console.info('Making a request for first round of Jeopardy...');
-      this.getNewRoundColumns(this.roundType); // this.columns = response;
+      this.getNewRoundColumns(this.roundType);
     },
     setupDoubleJeopardyRound: function setupDoubleJeopardyRound() {
       this.roundType = 1;
