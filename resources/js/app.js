@@ -39,24 +39,29 @@ const app = new Vue({
 		roundCountdownSeconds: 0,
 		roundCountdownSecondsDefault: 363,
 		
-		readingCountdownSeconds: 0,
+        readingCountdownSeconds: 0,
+        readingCountdownProgress: 0,
 		readingCountdownSecondsDefault: 4,
 		
 		buzzerPenaltySeconds: 0,
 		buzzerPenaltySecondsDefault: .5,
-		
+        
+        buzzerCountdownSeconds: 0,
+        buzzerCountdownProgress: 0,
+        buzzerCountdownDefault: 5,
+
 		finalJeopardySeconds: 0,
 		finalJeopardySecondsDefault: 30,
 		
-		currentAnswer: {},
+        currentAnswer: {},
+        currentAnswerColumn: -1,
+        currentAnswerRow: -1,
 		
 		showAnswer: false,
 
 		showBuzzerBlinkers: false,
 
         showLoading: false,
-        
-        currentRowCount: 0,
 		
 		roundType: 0,
 		
@@ -73,7 +78,7 @@ const app = new Vue({
 		
 	},
 	methods: {
-		init: function() {
+		reset: function() {
 			this.answerCountdownSeconds = 0;
 			this.roundCountdownSeconds = 0;
 			this.readingCountdownSeconds = 0;
@@ -132,19 +137,57 @@ const app = new Vue({
 		},
 		
 		setupSelectAnswerView: function() {
-			
+            
 		},
 		
-		setupReadingAnswerView: function( answer ) {
-			
-		},
+		setupReadingAnswerView: function( columnIndex, answerIndex ) {
+            //
+            this.currentAnswer = {};
+
+            this.currentAnswerColumn = columnIndex;
+            this.currentAnswerRow = answerIndex;
+
+            this.viewType = 2;
+
+            console.info('setupSelectAnswerView; current answer: ' + this.columns[columnIndex][answerIndex].answer);
+            
+            this.currentAnswer = this.columns[columnIndex][answerIndex];
+
+            this.showAnswer = true;
+            
+            this.readingCountdownSeconds = this.readingCountdownSecondsDefault;
+
+            this.readAnswer();
+
+        },
+        
+        readAnswer: function() {
+            //
+            
+        },
 		
 		setupWaitingForBuzzer: function( ) {
-			
+
+            this.viewType = 3;
+
+            this.buzzerCountdownSeconds = this.buzzerCountdownDefault;
+
+            this.showBuzzerBlinkers = true;
+            
 		},
 		
 		setupAnswerTimeUp: function() {
-			
+            this.viewType = 4;
+
+            this.buzzerCountdownSeconds = 0;
+
+            this.showBuzzerBlinkers = false;
+
+            this.columns[this.currentAnswerColumn][this.currentAnswerRow].answered_correctly = -1;
+
+            this.showAnswer = false;
+
+            
 		},
 		
 		setupRoundTimeUp: function() {
@@ -201,6 +244,57 @@ const app = new Vue({
 			return false;
 			
         },
+		
+		changeRound: function( roundType ) {
+				
+            this.setRound( roundType );
+            
+            this.setUpRound();
+            
+            console.log('Changed round type to ' + roundType);
+            return true;
+        
+		},
+		
+		nextRound: function() {
+			if ( this.round < 2 ) {
+				return this.roundType + 1;
+            }
+            
+			return 0;
+		},
+
+		setRound: function( roundType ) {
+			this.roundType = roundType;
+		},
+		
+		setUpRound: function() {
+			switch( this.roundType ) {
+				case 0:
+					// Jeopardy! round
+					this.setupJeopardyRound();
+					break;
+				case 1:
+					// Double Jeopardy! round
+					this.setupDoubleJeopardyRound();
+					break;
+				case 2:
+					// Final Jeopardy! round
+					this.setupFinalJeopardyRound();
+					break;
+            }
+            
+        },
+
+		// countDownTimer() {
+        //     if(this.countDown > 0) {
+        //         setTimeout(() => {
+        //             this.countDown -= 1
+        //             this.countDownTimer()
+        //         }, 1000)
+        //     }
+        // }
+        
 
 		getAnswerValue: function( row ) {
             
@@ -258,58 +352,50 @@ const app = new Vue({
                 
             }, this, currentRow, currentColumn);
         },
-		
-		changeRound: function( roundType ) {
-				
-            this.setRound( roundType );
-            
-            this.setUpRound();
-            
-            console.log('Changed round type to ' + roundType);
-            return true;
-        
-		},
-		
-		nextRound: function() {
-			if ( this.round < 2 ) {
-				return this.roundType + 1;
-            }
-            
-			return 0;
-		},
-
-		setRound: function( roundType ) {
-			this.roundType = roundType;
-		},
-		
-		setUpRound: function() {
-			switch( this.roundType ) {
-				case 0:
-					// Jeopardy! round
-					this.setupJeopardyRound();
-					break;
-				case 1:
-					// Double Jeopardy! round
-					this.setupDoubleJeopardyRound();
-					break;
-				case 2:
-					// Final Jeopardy! round
-					this.setupFinalJeopardyRound();
-					break;
-            }
-            
-		},
-
-		countDownTimer: function( countDown ) {
-			if(countDown > 0) {
-				setTimeout(() => {
-						countDown -= 1
-						// this.countDownTimer()
-				}, 1000);
-			}
-		},
 	},
 	mounted: function() {
 		
-	}
+    },
+    watch: {
+
+        readingCountdownSeconds: {
+            handler(value) {
+
+                if (value > 0 && this.viewType === 2) {
+                    setTimeout(() => {
+                        this.readingCountdownSeconds--;
+                        this.readingCountdownProgress = this.readingCountdownSeconds*100/this.readingCountdownSecondsDefault;
+                    }, 1000);
+                }
+                else if ( value <= 0 && this.viewType === 2 ) {
+                    
+                    this.setupWaitingForBuzzer();
+                    
+                    // return;
+                }
+
+            },
+            immediate: true // This ensures the watcher is triggered upon creation
+        },
+
+        buzzerCountdownSeconds: {
+            handler(value) {
+
+                if (value > 0 && this.viewType === 3) {
+                    setTimeout(( ) => {
+                        this.buzzerCountdownSeconds--;
+                        this.buzzerCountdownProgress = this.buzzerCountdownSeconds*100/this.buzzerCountdownDefault;
+                        
+                        console.info('Still time to buzz in...');
+                    }, 1000);
+                }
+                else if ( value < 1 && this.viewType === 3 ) {
+                    this.setupAnswerTimeUp();
+                }
+
+            },
+            immediate: true // This ensures the watcher is triggered upon creation
+        }
+
+    }
 });

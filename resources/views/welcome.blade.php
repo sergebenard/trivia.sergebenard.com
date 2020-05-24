@@ -9,17 +9,19 @@
     </div>
 
     <!-- 	The large text of the foccused answer -->
-    <div class="absolute inset-0 px-12 pt-10" v-if="showAnswer">
-        <div class=" absolute bg-blue-400 opacity-75 inset-0"></div>
+    <div class="absolute inset-0 px-12 pt-10 flex justify-center items-center" v-if="showAnswer">
+        <div class=" absolute bg-white opacity-75 inset-0"
+        v-on:click="showAnswer = false"></div>
 
-        <div class="relative max-w-5xl mx-auto flex- fixed
-                            bg-blue-700 text-white text-6xl text-center font-bold btnTextShadow
+        <div class="relative max-w-5xl mx-auto fixed-
+                            bg-blue-700 text-white text-6xl text-center font-bold leading-snug btnTextShadow
                             rounded-md border-8 border-black">
-            <div class=" px-10 py-4">
-                For the last 8 years of his life, Galileo was under house arrest for espousing this man's theory
-            </div>
-            <progress class="readingCountdown w-full bg-yellow-400" max="10"
-                :value="readingCountdownSeconds"></progress>
+            <div class=" px-10 py-4"
+                v-text="currentAnswer.question"></div>
+            <progress class="readingCountdown w-full bg-yellow-400"
+                max="100"
+                :value="readingCountdownProgress"></progress>
+                
         </div>
     </div>
     <!-- 	end of focused answer -->
@@ -67,7 +69,8 @@
     </div>
     <div class="px-4 inline py-4 mx-auto">
         <div class="flex flex-wrap justify-center mx-auto select-none">
-            <div class=" bg-blue-300 w-8 mt-10 mr-4" :class="[viewType === 3 ? 'blink' : 'hidden']"></div>
+            <div class=" bg-yellow-600 w-8 mt-10 mr-4 blink relative z-20"
+                v-if="showBuzzerBlinkers"></div>
 
             <div class="">
                 <div class="flex justify-center mx-auto">
@@ -91,12 +94,13 @@
                             v-bind:answer="answer"
                             v-bind:answer-index="answerIndex"
                             v-bind:column-index="columnIndex"
-                            v-on:show-answer="setupSelectAnswerView( columnIndex, answerIndex )"></panel-answer>
+                            v-on:show-answer="setupReadingAnswerView( columnIndex, answerIndex )"></panel-answer>
                     </div>
                 </div>
             </div>
 
-            <div class=" bg-blue-300 w-8 mt-10 ml-4" :class="[viewType === 3 ? 'blink' : 'hidden']"></div>
+            <div class=" bg-yellow-600 w-8 mt-10 ml-4 blink relative z-20 shadow-lg"
+                v-if="showBuzzerBlinkers"></div>
 
         </div>
     </div>

@@ -22,7 +22,7 @@ export default {
         clicked: function() {
             console.info( 'Clicked on button Col: ' + this.columnIndex + '; Row: ' + this.answerIndex )
             if( !this.answer.answered_correctly ) {
-                this.$emit( 'showAnswer', this.columnIndex, this.answerIndex );
+                this.$emit( 'show-answer', this.columnIndex, this.answerIndex );
             }
         }
     }
