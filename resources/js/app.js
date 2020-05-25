@@ -37,11 +37,12 @@ const app = new Vue({
 		answerCountdownSecondsDefault: 12,
 		
 		roundCountdownSeconds: 0,
-		roundCountdownSecondsDefault: 363,
+        roundCountdownSecondsDefault: 363,
 		
         readingCountdownSeconds: 0,
         readingCountdownProgress: 0,
-		readingCountdownSecondsDefault: 4,
+        readingCountdownSecondsDefault: 4,
+        readingCountdown: {},
 		
 		buzzerPenaltySeconds: 0,
 		buzzerPenaltySecondsDefault: .5,
@@ -49,15 +50,19 @@ const app = new Vue({
         buzzerCountdownSeconds: 0,
         buzzerCountdownProgress: 0,
         buzzerCountdownDefault: 5,
+        buzzerCountdown: {},
+
+        givingQuestionCountdownSeconds: 0,
+        givingQuestionCountdownProgress: 0,
+        givingQuestionCountdownSecondsDefault: 5,
 
 		finalJeopardySeconds: 0,
 		finalJeopardySecondsDefault: 30,
-		
-        currentAnswer: {},
-        currentAnswerColumn: -1,
-        currentAnswerRow: -1,
-		
-		showAnswer: false,
+        
+        pressedBuzzer: false,
+        
+        showAnswer: false,
+        showQuestion: false,
 
 		showBuzzerBlinkers: false,
 
@@ -66,15 +71,20 @@ const app = new Vue({
 		roundType: 0,
 		
 		// View Types are:
-		// 0 - Start Up
-		// 1 - Select Answer
-		// 2 - Reading Answer
-		// 3 - Waiting for Buzzer
-		// 4 - Answer Time Up
-		// 5 - End of Round
-		viewType: 0,
+		// startUp - Start Up
+		// selectAnswer - Select Answer
+		// readingAnswer - Reading Answer
+		// waitingForBuzzer - Waiting for Buzzer
+        // answerTimeUp - Answer Time Up
+        // givingQuestion - When the user is allowed to give the question
+		// 6 - End of Round
+        viewType: 'startUp',
+        
+        currentAnswer: {},
+        currentAnswerColumn: -1,
+        currentAnswerRow: -1,
+
 		columns: [],
-		
 		
 	},
 	methods: {
@@ -87,7 +97,7 @@ const app = new Vue({
 			this.currentAnswer = {};
 			this.showAnswer = false;
 			this.round = 1;
-			this.viewType = 0;
+			this.viewType = 'startUp';
 		},
 
 		getNewRoundColumns: function( roundType ) {
@@ -137,7 +147,7 @@ const app = new Vue({
 		},
 		
 		setupSelectAnswerView: function() {
-            
+            this.viewType = 'selectAnswer';
 		},
 		
 		setupReadingAnswerView: function( columnIndex, answerIndex ) {
@@ -147,7 +157,7 @@ const app = new Vue({
             this.currentAnswerColumn = columnIndex;
             this.currentAnswerRow = answerIndex;
 
-            this.viewType = 2;
+            this.viewType = 'readingAnswer';
 
             console.info('setupSelectAnswerView; current answer: ' + this.columns[columnIndex][answerIndex].answer);
             
@@ -168,7 +178,7 @@ const app = new Vue({
 		
 		setupWaitingForBuzzer: function( ) {
 
-            this.viewType = 3;
+            this.viewType = 'waitingForBuzzer';
 
             this.buzzerCountdownSeconds = this.buzzerCountdownDefault;
 
@@ -177,7 +187,8 @@ const app = new Vue({
 		},
 		
 		setupAnswerTimeUp: function() {
-            this.viewType = 4;
+
+            this.viewType = 'answerTimeUp';
 
             this.buzzerCountdownSeconds = 0;
 
@@ -185,9 +196,7 @@ const app = new Vue({
 
             this.columns[this.currentAnswerColumn][this.currentAnswerRow].answered_correctly = -1;
 
-            this.showAnswer = false;
 
-            
 		},
 		
 		setupRoundTimeUp: function() {
@@ -198,53 +207,6 @@ const app = new Vue({
 			
 		},
 		
-		changeViewType: function(viewType = null) {
-			if ( viewType !== null && ( viewType > -1 && viewType < 6) ) {
-				
-				// Let's set up the view as the view requires
-				switch( viewType ) {
-					case 0:
-						if ( this.setupNewRoundView() ) {
-							this.viewType = viewType;
-						}
-						break;
-					case 1:
-						if ( this.setupSelectAnswerView() ) {
-							this.viewType = viewType;
-						}
-						break;
-					case 2:
-						if ( this.setupReadingAnswerView() ) {
-							this.viewType = viewType;
-						}
-						break;
-					case 3:
-						if ( this.setupWaitingForBuzzer() ) {
-							this.viewType = viewType;
-						}
-						break;
-					case 4:
-						if ( this.setupAnswerTimeUp( ) ) {
-							this.viewType = viewType;
-						}
-						break;
-					case 5:
-						this.setupRoundTimeUp();
-						break;		
-				};
-				
-				// Finally, set up the View Type!
-				this.viewType = viewType;
-				console.log('Changed View Type to ' + viewType);
-				return true;
-				
-			}
-			
-			console.log('Unable to Change View Type to ' + viewType);
-			return false;
-			
-        },
-		
 		changeRound: function( roundType ) {
 				
             this.setRound( roundType );
@@ -252,6 +214,7 @@ const app = new Vue({
             this.setUpRound();
             
             console.log('Changed round type to ' + roundType);
+
             return true;
         
 		},
@@ -285,17 +248,7 @@ const app = new Vue({
             }
             
         },
-
-		// countDownTimer() {
-        //     if(this.countDown > 0) {
-        //         setTimeout(() => {
-        //             this.countDown -= 1
-        //             this.countDownTimer()
-        //         }, 1000)
-        //     }
-        // }
         
-
 		getAnswerValue: function( row ) {
             
             // Null this out if we're at Final Jeopardy!
@@ -358,16 +311,36 @@ const app = new Vue({
     },
     watch: {
 
+        givingQuestionCountdownSeconds: {
+            handler(value) {
+
+                if (value > 0 && this.viewType == 'readingAnswer') {
+                    setTimeout(() => {
+                        this.givingQuestionCountdownSeconds--;
+                        this.readingCountdownProgress = this.givingQuestionCountdownSeconds*100/this.givingQuestionCountdownSecondsDefault;
+                    }, 1000);
+                }
+                else if ( value <= 0 && this.viewType == 'readingAnswer' ) {
+                    
+                    this.setupWaitingForBuzzer();
+                    
+                    // return;
+                }
+
+            },
+            immediate: true // This ensures the watcher is triggered upon creation
+        },
+
         readingCountdownSeconds: {
             handler(value) {
 
-                if (value > 0 && this.viewType === 2) {
-                    setTimeout(() => {
+                if (value > 0 && this.viewType == 'readingAnswer') {
+                    this.readingCountdown = setTimeout(() => {
                         this.readingCountdownSeconds--;
                         this.readingCountdownProgress = this.readingCountdownSeconds*100/this.readingCountdownSecondsDefault;
                     }, 1000);
                 }
-                else if ( value <= 0 && this.viewType === 2 ) {
+                else if ( value <= 0 && this.viewType == 'readingAnswer' ) {
                     
                     this.setupWaitingForBuzzer();
                     
@@ -381,15 +354,19 @@ const app = new Vue({
         buzzerCountdownSeconds: {
             handler(value) {
 
-                if (value > 0 && this.viewType === 3) {
-                    setTimeout(( ) => {
-                        this.buzzerCountdownSeconds--;
-                        this.buzzerCountdownProgress = this.buzzerCountdownSeconds*100/this.buzzerCountdownDefault;
+                if (value > 0 && this.viewType == 'waitingForBuzzer') {
+                    this.buzzerCountdown = setTimeout(( ) => {
                         
                         console.info('Still time to buzz in...');
+
+                        this.buzzerCountdownSeconds--;
+                        this.buzzerCountdownProgress = this.buzzerCountdownSeconds*100/this.buzzerCountdownDefault;
+
                     }, 1000);
                 }
-                else if ( value < 1 && this.viewType === 3 ) {
+                else if ( value < 1 && this.viewType == 'waitingForBuzzer' ) {
+                    console.info('Time is up!');
+
                     this.setupAnswerTimeUp();
                 }
 

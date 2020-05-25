@@ -17,7 +17,7 @@
                             bg-blue-700 text-white text-6xl text-center font-bold leading-snug btnTextShadow
                             rounded-md border-8 border-black">
             <div class=" px-10 py-4"
-                v-text="currentAnswer.question"></div>
+                v-text="viewType !== 'answerTimeUp' ? currentAnswer.question : currentAnswer.answer"></div>
             <progress class="readingCountdown w-full bg-yellow-400"
                 max="100"
                 :value="readingCountdownProgress"></progress>
@@ -27,7 +27,7 @@
     <!-- 	end of focused answer -->
 
     <div class="flex justify-center items-center mx-auto pt-2 px-4">
-        <div class="bg-blue-400 px-3 py-2 rounded-l text-blue-200 border border-transparent">
+        {{-- <div class="bg-blue-400 px-3 py-2 rounded-l text-blue-200 border border-transparent">
             Change to view mode
         </div>
         <button class="px-3 py-2
@@ -52,10 +52,11 @@
             @click.prevent="changeViewType(4)">4</button>
 
         <div class="w-12"></div>
+            --}}
 
-        <button class="px-3 py-2 rounded-l
-                                    bg-green-200 text-green-500 border border-green-400
-                                    hover:bg-green-400 hover:text-green-100"
+        <button class="px-3 py-2 rounded-l flex-1-
+                        bg-green-200 text-green-500 border border-green-400
+                        hover:bg-green-400 hover:text-green-100"
             @click.prevent="changeRound(0)">Jeopardy!</button>
         <button class="px-3 py-2
                                     bg-green-200 text-green-500 border border-green-400
