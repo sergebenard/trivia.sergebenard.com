@@ -15,11 +15,15 @@ use Illuminate\Support\Facades\Route;
 
 // Mysql import  LOAD DATA INFILE 'D:\\Sites\\JEOPARDY_CSV-cleaned.csv' IGNORE INTO TABLE questions FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 ROWS;
 
+Auth::routes();
+
 Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+Route::get('/teams', function() {
+    return view('teams');
+});
 
 Route::get('/home', 'HomeController@index')->name('home');
 

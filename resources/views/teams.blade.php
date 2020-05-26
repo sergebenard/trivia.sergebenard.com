@@ -91,7 +91,7 @@
 </div>
 @endsection
 
-@section('javascript')
-<!-- Scripts -->
-<script src="{{ asset('js/app.js') }}" defer></script>
+@section( 'javascript' )
+    <!-- Scripts -->
+    <script src="{{ asset('js/teams.js') }}" defer></script>
 @endsection
