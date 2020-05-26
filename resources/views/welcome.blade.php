@@ -9,50 +9,33 @@
     </div>
 
     <!-- 	The large text of the foccused answer -->
-    <div class="absolute inset-0 px-12 pt-10 flex justify-center items-center" v-if="showAnswer">
-        <div class=" absolute bg-white opacity-75 inset-0"
-        v-on:click="showAnswer = false"></div>
+    <div class="absolute inset-0 px-12 pt-10 flex justify-center items-center" v-if="showAnswerModal">
+        <div class=" absolute bg-white opacity-75 inset-0"></div>
 
-        <div class="relative max-w-5xl mx-auto fixed-
+        <div class="relative flex-initial w-full max-w-5xl my-32 mx-auto fixed-
                             bg-blue-700 text-white text-6xl text-center font-bold leading-snug btnTextShadow
                             rounded-md border-8 border-black">
             <div class=" px-10 py-4"
-                v-text="viewType !== 'answerTimeUp' ? currentAnswer.question : currentAnswer.answer"></div>
+                v-text="showQuestion ? currentAnswer.question : currentAnswer.answer"></div>
+
             <progress class="readingCountdown w-full bg-yellow-400"
                 max="100"
                 :value="readingCountdownProgress"></progress>
+            
                 
         </div>
+
+        <div class="  absolute inset-0 z-30"
+            v-if="viewType == 'showQuestion'"
+            v-on:click="setupResetAnswerModal()">
+            &nbsp;
+        </div>
+
+        
     </div>
     <!-- 	end of focused answer -->
 
     <div class="flex justify-center items-center mx-auto pt-2 px-4">
-        {{-- <div class="bg-blue-400 px-3 py-2 rounded-l text-blue-200 border border-transparent">
-            Change to view mode
-        </div>
-        <button class="px-3 py-2
-                                    bg-blue-200 text-blue-500 border border-blue-400
-                                    hover:bg-blue-600 hover:text-blue-100 hover:border-blue-600"
-            v-on:click.prevent="changeViewType(0)">0</button>
-        <button class="px-3 py-2
-                                    bg-blue-200 text-blue-500 border border-blue-400
-                                    hover:bg-blue-600 hover:text-blue-100 hover:border-blue-600"
-            @click.prevent="changeViewType(1)">1</button>
-        <button class="px-3 py-2
-                                    bg-blue-200 text-blue-500 border border-blue-400
-                                    hover:bg-blue-600 hover:text-blue-100 hover:border-blue-600"
-            @click.prevent="changeViewType(2)">2</button>
-        <button class="px-3 py-2
-                                    bg-blue-200 text-blue-500 border border-blue-400
-                                    hover:bg-blue-600 hover:text-blue-100 hover:border-blue-600"
-            @click.prevent="changeViewType(3)">3</button>
-        <button class="px-3 py-2
-                                    bg-blue-200 text-blue-500 rounded-r border border-blue-400
-                                    hover:bg-blue-600 hover:text-blue-100 hover:border-blue-600"
-            @click.prevent="changeViewType(4)">4</button>
-
-        <div class="w-12"></div>
-            --}}
 
         <button class="px-3 py-2 rounded-l flex-1-
                         bg-green-200 text-green-500 border border-green-400
@@ -75,9 +58,9 @@
 
             <div class="">
                 <div class="flex justify-center mx-auto">
-                    <div v-for="header in columns" class="w-48 grid grid-columns-6
+                    <div v-for="header in columns" class="w-48 h-24 grid grid-columns-6
                                             text-center">
-                        <div class="btnHeaderShadow px-2 py-5 flex justify-center items-center
+                        <div class="btnHeaderShadow flex justify-center items-center
                             bg-blue-700 font-bold text-lg text-white border border-b-4 border-black leading-tight"
                             v-text="header[0].category"></div>
                     </div>
@@ -91,7 +74,7 @@
                             
                         </div> --}}
                         <panel-answer v-for="(answer, answerIndex) in column"
-                            v-bind:key="answer.question"
+                            v-bind:key="answer.question + answerIndex"
                             v-bind:answer="answer"
                             v-bind:answer-index="answerIndex"
                             v-bind:column-index="columnIndex"

@@ -33,35 +33,40 @@ const app = new Vue({
 		'panel-answer': panelAnswerComponent,
 	},
 	data: {
-		answerCountdownSeconds: 0,
+        answerCountdown: {},
+        answerCountdownSeconds: 0,
 		answerCountdownSecondsDefault: 12,
-		
+        
+        roundCountdown: {},
 		roundCountdownSeconds: 0,
         roundCountdownSecondsDefault: 363,
 		
+        readingCountdown: {},
         readingCountdownSeconds: 0,
         readingCountdownProgress: 0,
         readingCountdownSecondsDefault: 4,
-        readingCountdown: {},
-		
+        
+        buzzerPenalty: {},
 		buzzerPenaltySeconds: 0,
 		buzzerPenaltySecondsDefault: .5,
         
+        buzzerCountdown: {},
         buzzerCountdownSeconds: 0,
         buzzerCountdownProgress: 0,
         buzzerCountdownDefault: 5,
-        buzzerCountdown: {},
 
+        givingQuestion: {},
         givingQuestionCountdownSeconds: 0,
         givingQuestionCountdownProgress: 0,
-        givingQuestionCountdownSecondsDefault: 5,
+        givingQuestionCountdownDefault: 5,
 
-		finalJeopardySeconds: 0,
-		finalJeopardySecondsDefault: 30,
+        finalJeopardyCountdown: {},
+		finalJeopardyCountdownSeconds: 0,
+		finalJeopardyCountdownDefault: 30,
         
-        pressedBuzzer: false,
-        
-        showAnswer: false,
+        successfulBuzzer: false,
+
+        showAnswerModal: false,
         showQuestion: false,
 
 		showBuzzerBlinkers: false,
@@ -71,12 +76,14 @@ const app = new Vue({
 		roundType: 0,
 		
 		// View Types are:
-		// startUp - Start Up
+        // startUp - Start Up
+        // loadingData - Loading data from server
 		// selectAnswer - Select Answer
 		// readingAnswer - Reading Answer
 		// waitingForBuzzer - Waiting for Buzzer
         // answerTimeUp - Answer Time Up
         // givingQuestion - When the user is allowed to give the question
+        // showQuestion - When the user is allowed to view the question
 		// 6 - End of Round
         viewType: 'startUp',
         
@@ -88,20 +95,58 @@ const app = new Vue({
 		
 	},
 	methods: {
-		reset: function() {
-			this.answerCountdownSeconds = 0;
-			this.roundCountdownSeconds = 0;
-			this.readingCountdownSeconds = 0;
-			this.buzzerPenaltySeconds = 0;
-			this.finalJeopardySeconds = 0;
-			this.currentAnswer = {};
-			this.showAnswer = false;
-			this.round = 1;
-			this.viewType = 'startUp';
-		},
+
+        setupResetAnswerModal: function( ) {
+            console.info('In setupResetAnswerModal...');
+
+            //Hide the Answer Modal and also Show the Loading screen while we're doing this...
+            this.showAnswerModal = false;
+            this.showLoading = true;
+
+            this.answerCountdown = {};
+            this.answerCountdownSeconds = 0;
+            
+            this.roundCountdown = {};
+            this.roundCountdownSeconds = 0;
+            
+            this.readingCountdown = {};
+            this.readingCountdownSeconds = 0;
+            this.readingCountdownProgress = 0;
+            
+            this.buzzerPenalty = {};
+            this.buzzerPenaltySeconds = 0;
+            
+            this.buzzerCountdown = {};
+            this.buzzerCountdownSeconds = 0;
+            this.buzzerCountdownProgress = 0;
+
+            this.givingQuestion = {};
+            this.givingQuestionCountdownSeconds = 0;
+            this.givingQuestionCountdownProgress = 0;
+
+            this.finalJeopardyCountdown = {};
+            this.finalJeopardyCountdownSeconds = 0;
+            
+            this.successfulBuzzer = false;
+
+            this.showQuestion = false;
+
+            this.showBuzzerBlinkers = false;
+
+            this.viewType = 'startUp',
+        
+            this.currentAnswer = {},
+            this.currentAnswerColumn = -1,
+            this.currentAnswerRow = -1,
+
+            this.showLoading = false;
+
+        },
 
 		getNewRoundColumns: function( roundType ) {
-			this.showLoading = true;
+            
+
+            this.showLoading = true;
 
 			this.columns = [];
 
@@ -151,31 +196,30 @@ const app = new Vue({
 		},
 		
 		setupReadingAnswerView: function( columnIndex, answerIndex ) {
+
+            this.viewType = 'readingAnswer';
             //
             this.currentAnswer = {};
 
             this.currentAnswerColumn = columnIndex;
             this.currentAnswerRow = answerIndex;
 
-            this.viewType = 'readingAnswer';
-
-            console.info('setupSelectAnswerView; current answer: ' + this.columns[columnIndex][answerIndex].answer);
+            console.info('setupSelectAnswerView; current question: ' + this.columns[columnIndex][answerIndex].question);
             
             this.currentAnswer = this.columns[columnIndex][answerIndex];
 
-            this.showAnswer = true;
+            this.showAnswerModal = true;
             
             this.readingCountdownSeconds = this.readingCountdownSecondsDefault;
 
-            this.readAnswer();
 
         },
         
-        readAnswer: function() {
-            //
+        setupHideAnswerModalView: function() {
+            // Reset everything relating to the answer modal
             
         },
-		
+        
 		setupWaitingForBuzzer: function( ) {
 
             this.viewType = 'waitingForBuzzer';
@@ -196,8 +240,22 @@ const app = new Vue({
 
             this.columns[this.currentAnswerColumn][this.currentAnswerRow].answered_correctly = -1;
 
+            this.setupShowQuestionView();
 
-		},
+        },
+        
+        setupShowQuestionView: function() {
+            this.viewType = 'showQuestion';
+            this.showQuestion = true;
+
+
+        },
+
+        
+        setupHideAnswerModalView: function() {
+            // Reset everything relating to the answer modal
+            
+        },
 		
 		setupRoundTimeUp: function() {
 			
