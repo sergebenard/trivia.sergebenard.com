@@ -31920,11 +31920,10 @@ var app = new Vue({
       this.showBuzzerBlinkers = true;
     },
     setupAnswerTimeUp: function setupAnswerTimeUp() {
-      this.viewType = 'answerTimeUp';
-      this.buzzerCountdownSeconds = 0;
+      this.viewType = 'answerTimeUp'; // this.buzzerCountdownSeconds = 0;
+
       this.showBuzzerBlinkers = false;
-      this.columns[this.currentAnswerColumn][this.currentAnswerRow].answered_correctly = -1;
-      this.setupShowQuestionView();
+      this.columns[this.currentAnswerColumn][this.currentAnswerRow].answered_correctly = -1; // this.setupShowQuestionView();
     },
     setupShowQuestionView: function setupShowQuestionView() {
       this.viewType = 'showQuestion';

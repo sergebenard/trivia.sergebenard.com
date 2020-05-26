@@ -234,13 +234,13 @@ const app = new Vue({
 
             this.viewType = 'answerTimeUp';
 
-            this.buzzerCountdownSeconds = 0;
+            // this.buzzerCountdownSeconds = 0;
 
             this.showBuzzerBlinkers = false;
 
             this.columns[this.currentAnswerColumn][this.currentAnswerRow].answered_correctly = -1;
 
-            this.setupShowQuestionView();
+            // this.setupShowQuestionView();
 
         },
         

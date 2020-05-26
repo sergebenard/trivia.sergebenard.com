@@ -26,8 +26,8 @@
         </div>
 
         <div class="  absolute inset-0 z-30"
-            v-if="viewType == 'showQuestion'"
-            v-on:click="setupResetAnswerModal()">
+            v-if="viewType == 'answerTimeUp' || viewType == 'showQuestion'"
+            v-on:click=" viewType == 'answerTimeUp' ? setupShowQuestionView() : viewType == 'showQuestion' ? setupResetAnswerModal() : setupShowQuestionView()">
             &nbsp;
         </div>
 
