@@ -51,4 +51,12 @@ class QuestionsController extends Controller
         return response()->json( $allColumns );
         
     }
+
+    public function remote( $answer ) {
+        if ( empty( $answer ) ) {
+            $answer = 'No answer provided!';
+        }
+        
+        return view('remote', ['answer' => $answer]);
+    }
 }

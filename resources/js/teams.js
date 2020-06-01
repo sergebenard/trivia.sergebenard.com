@@ -32,6 +32,12 @@ const app = new Vue({
 		'panel-answer': panelAnswerComponent,
 	},
 	data: {
+        newUser: {
+            name: "",
+            points: 0,
+        },
+        users: [],
+
         answerCountdown: {},
         answerCountdownSeconds: 0,
 		answerCountdownSecondsDefault: 12,
@@ -71,7 +77,9 @@ const app = new Vue({
 		showBuzzerBlinkers: false,
 
         showLoading: false,
-		
+        
+        newWindow: null,
+        
 		roundType: 0,
 		
 		// View Types are:
@@ -94,6 +102,16 @@ const app = new Vue({
 		
 	},
 	methods: {
+
+        addNewUser: function() {
+            if( this.newUser.name !== "" ) {
+                this.users.push( this.newUser );
+                this.newUser = {
+                    name: "",
+                    points: 0,
+                }
+            }
+        },
 
         setupResetAnswerModal: function( ) {
             console.info('In setupResetAnswerModal...');
@@ -132,7 +150,7 @@ const app = new Vue({
 
             this.showBuzzerBlinkers = false;
 
-            this.viewType = 'startUp',
+            this.viewType = 'selectAnswer',
         
             this.currentAnswer = {},
             this.currentAnswerColumn = -1,
@@ -144,6 +162,7 @@ const app = new Vue({
 
 		getNewRoundColumns: function( roundType ) {
             
+            this.viewType = "loadingData";
 
             this.showLoading = true;
 
@@ -158,6 +177,7 @@ const app = new Vue({
                     
                     this.fixAnswerValue();
 
+                    this.viewType = "selectAnswer";
 				});
 		},
 		
@@ -188,9 +208,17 @@ const app = new Vue({
 		
 		setupNewRoundView: function( columnsData ) {
 			
-		},
+        },
+        
+        givePointsToUser: function( userIndex ) {
+            this.users[ userIndex ].points += this.currentAnswer.answer_value;
+
+            this.setupResetAnswerModal();
+        },
 		
 		setupSelectAnswerView: function() {
+            this.setupResetAnswerModal();
+
             this.viewType = 'selectAnswer';
 		},
 		
@@ -207,10 +235,26 @@ const app = new Vue({
             
             this.currentAnswer = this.columns[columnIndex][answerIndex];
 
+            this.openNewWindow();
+
             this.showAnswerModal = true;
             
             this.readingCountdownSeconds = this.readingCountdownSecondsDefault;
 
+
+        },
+
+        openNewWindow: function() {
+            if ( this.newWindow === null ) {
+                this.newWindow = window.open(
+                    '/teams/remote/' + encodeURI( this.currentAnswer.question ),
+                    'triviaTrainingAnswer', 'menubar=no,location=no,resizable=yes,scrollbars=no,status=no');
+                return true;
+            }
+
+            this.newWindow = window.open(
+                '/teams/remote/' + encodeURI( this.currentAnswer.question ),
+                'triviaTrainingAnswer');
 
         },
         

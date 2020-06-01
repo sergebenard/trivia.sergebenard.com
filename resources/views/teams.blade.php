@@ -13,21 +13,34 @@
         <div class=" absolute bg-white opacity-75 inset-0"></div>
 
         <div class="relative flex-initial w-full max-w-5xl my-32 mx-auto fixed-
-                            bg-blue-700 text-white text-6xl text-center font-bold leading-snug btnTextShadow
+                            bg-blue-700 text-center
                             rounded-md border-8 border-black">
-            <div class=" px-10 py-4"
+            <div class=" px-10 py-4 text-white text-6xl btnTextShadow font-bold leading-snug"
                 v-text="showQuestion ? currentAnswer.question : currentAnswer.answer"></div>
 
             <progress class="readingCountdown w-full bg-yellow-400"
                 max="100"
-                :value="readingCountdownProgress"></progress>
+                :value="readingCountdownProgress"
+                v-if="viewType != 'showQuestion'"></progress>
             
                 
+            <div class="flex w-full justify-center py-3"
+                v-if="viewType == 'showQuestion'">
+                <button class="bg-blue-700 flex flex-wrap justify-center items-center px-3 py-2 text-xl text-center text-white
+                    hover:bg-blue-100 hover:text-blue-700"
+                    v-for="(user, userIndex) in users"
+                    v-text="user.name"
+                    v-on:click="givePointsToUser( userIndex )">
+                </button>
+                <button class=" text-indigo-100 bg-indigo-600 px-3 py-2"
+                    v-on:click="setupSelectAnswerView">Continue</button>
+            </div>
+            
         </div>
 
         <div class="  absolute inset-0 z-30"
-            v-if="viewType == 'answerTimeUp' || viewType == 'showQuestion'"
-            v-on:click=" viewType == 'answerTimeUp' ? setupShowQuestionView() : viewType == 'showQuestion' ? setupResetAnswerModal() : setupShowQuestionView()">
+            v-if="viewType == 'answerTimeUp'"
+            v-on:click=" viewType == 'answerTimeUp' ? setupShowQuestionView() : setupShowQuestionView()">
             &nbsp;
         </div>
 
@@ -51,6 +64,31 @@
             Jeopardy!</button>
 
     </div>
+
+    <div class="flex flex-wrap max-w-3xl px-10 mx-auto pt-4">
+        <div class="bg-blue-700 flex flex-wrap justify-center items-center px-3 py-2"
+            v-for="user in users">
+            <span class="w-full text-blue-100 text-center"
+                v-text="user.name"></span>
+            <span class="btnHeaderShadow w-full text-xl text-center text-white"
+                v-text="user.points"></span>
+        </div>
+
+        <div class="max-w-sm mx-auto pt-2"
+            v-if="viewType == 'startUp'">
+            <label class=" block w-full text-blue-500 py-2"
+                for="newUser">New User</label>
+            <div class="flex justify-center items-center-">
+                <input class=" rounded-l border border-blue-500 px-2 py-2"
+                    type="text" name="newUser" id="newUser"
+                    v-model="newUser.name">
+                <button class=" rounded-r flex justify-center items-center p-2
+                    border-t border-r border-b border-blue-500 text-blue-500 text-2xl"
+                    v-on:click="addNewUser">+</button>
+            </div>
+        </div>
+    </div>
+
     <div class="px-4 inline py-4 mx-auto">
         <div class="flex flex-wrap justify-center mx-auto select-none">
             <div class=" bg-yellow-600 w-8 mt-10 mr-4 blink relative z-20"

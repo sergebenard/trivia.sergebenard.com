@@ -31898,6 +31898,11 @@ var app = new Vue({
     'panel-answer': _components_panel_answer_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
   data: {
+    newUser: {
+      name: "",
+      points: 0
+    },
+    users: [],
     answerCountdown: {},
     answerCountdownSeconds: 0,
     answerCountdownSecondsDefault: 12,
@@ -31927,6 +31932,7 @@ var app = new Vue({
     showQuestion: false,
     showBuzzerBlinkers: false,
     showLoading: false,
+    newWindow: null,
     roundType: 0,
     // View Types are:
     // startUp - Start Up
@@ -31945,6 +31951,15 @@ var app = new Vue({
     columns: []
   },
   methods: (_methods = {
+    addNewUser: function addNewUser() {
+      if (this.newUser.name !== "") {
+        this.users.push(this.newUser);
+        this.newUser = {
+          name: "",
+          points: 0
+        };
+      }
+    },
     setupResetAnswerModal: function setupResetAnswerModal() {
       console.info('In setupResetAnswerModal...'); //Hide the Answer Modal and also Show the Loading screen while we're doing this...
 
@@ -31970,11 +31985,12 @@ var app = new Vue({
       this.successfulBuzzer = false;
       this.showQuestion = false;
       this.showBuzzerBlinkers = false;
-      this.viewType = 'startUp', this.currentAnswer = {}, this.currentAnswerColumn = -1, this.currentAnswerRow = -1, this.showLoading = false;
+      this.viewType = 'selectAnswer', this.currentAnswer = {}, this.currentAnswerColumn = -1, this.currentAnswerRow = -1, this.showLoading = false;
     },
     getNewRoundColumns: function getNewRoundColumns(roundType) {
       var _this = this;
 
+      this.viewType = "loadingData";
       this.showLoading = true;
       this.columns = [];
       axios.get('/newRound/' + roundType).then(function (response) {
@@ -31983,6 +31999,8 @@ var app = new Vue({
         _this.columns = response.data;
 
         _this.fixAnswerValue();
+
+        _this.viewType = "selectAnswer";
       });
     },
     setupJeopardyRound: function setupJeopardyRound() {
@@ -31999,7 +32017,12 @@ var app = new Vue({
       this.getNewRoundColumns(this.roundType);
     },
     setupNewRoundView: function setupNewRoundView(columnsData) {},
+    givePointsToUser: function givePointsToUser(userIndex) {
+      this.users[userIndex].points += this.currentAnswer.answer_value;
+      this.setupResetAnswerModal();
+    },
     setupSelectAnswerView: function setupSelectAnswerView() {
+      this.setupResetAnswerModal();
       this.viewType = 'selectAnswer';
     },
     setupReadingAnswerView: function setupReadingAnswerView(columnIndex, answerIndex) {
@@ -32010,8 +32033,17 @@ var app = new Vue({
       this.currentAnswerRow = answerIndex;
       console.info('setupSelectAnswerView; current question: ' + this.columns[columnIndex][answerIndex].question);
       this.currentAnswer = this.columns[columnIndex][answerIndex];
+      this.openNewWindow();
       this.showAnswerModal = true;
       this.readingCountdownSeconds = this.readingCountdownSecondsDefault;
+    },
+    openNewWindow: function openNewWindow() {
+      if (this.newWindow === null) {
+        this.newWindow = window.open('/teams/remote/' + encodeURI(this.currentAnswer.question), 'triviaTrainingAnswer', 'menubar=no,location=no,resizable=yes,scrollbars=no,status=no');
+        return true;
+      }
+
+      this.newWindow = window.open('/teams/remote/' + encodeURI(this.currentAnswer.question), 'triviaTrainingAnswer');
     },
     setupHideAnswerModalView: function setupHideAnswerModalView() {// Reset everything relating to the answer modal
     },

@@ -25,6 +25,8 @@ Route::get('/teams', function() {
     return view('teams');
 });
 
+Route::get('/teams/remote/{answer}', 'QuestionsController@remote')->name('answerRemote');
+
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/newRound/{type}', 'QuestionsController@getRoundQuestions')->name('columns.get');
