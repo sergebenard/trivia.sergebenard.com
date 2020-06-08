@@ -32,11 +32,15 @@ const app = new Vue({
 		'panel-answer': panelAnswerComponent,
 	},
 	data: {
+
         newUser: {
             name: "",
             points: 0,
         },
+
         users: [],
+
+        remoteUrl: "/teams/remote",
 
         answerCountdown: {},
         answerCountdownSeconds: 0,
@@ -166,7 +170,9 @@ const app = new Vue({
 
             this.showLoading = true;
 
-			this.columns = [];
+            this.columns = [];
+            
+            this.currentAnswer = {};
 
 			axios.get('/newRound/' + roundType)
 				.then((response)=>{
@@ -176,6 +182,8 @@ const app = new Vue({
                     this.columns = response.data;
                     
                     this.fixAnswerValue();
+
+                    this.openNewWindow();
 
                     this.viewType = "selectAnswer";
 				});
@@ -210,10 +218,16 @@ const app = new Vue({
 			
         },
         
-        givePointsToUser: function( userIndex ) {
-            this.users[ userIndex ].points += this.currentAnswer.answer_value;
+        givePointsToUser: function( userIndex, subtract = false ) {
+            if ( subtract === false ) {
+                this.users[ userIndex ].points += this.currentAnswer.answer_value;
 
-            this.setupResetAnswerModal();
+                this.setupResetAnswerModal();
+                return;
+            }
+            
+            this.users[ userIndex ].points -= this.currentAnswer.answer_value;
+            
         },
 		
 		setupSelectAnswerView: function() {
@@ -244,16 +258,22 @@ const app = new Vue({
 
         },
 
+        getRemoteURL: function() {
+            return this.remoteUrl + "/" + ( this.currentAnswer.question === null || this.currentAnswer.question === undefined ? 'Please Move This Window Away from the Shared Screen' : encodeURI( this.currentAnswer.question ) );
+        },
+
         openNewWindow: function() {
-            if ( this.newWindow === null ) {
-                this.newWindow = window.open(
-                    '/teams/remote/' + encodeURI( this.currentAnswer.question ),
-                    'triviaTrainingAnswer', 'menubar=no,location=no,resizable=yes,scrollbars=no,status=no');
+
+            let url = this.getRemoteURL();
+
+            if ( this.newWindow === null || this.newWindow.closed ) {
+
+                this.newWindow = window.open( url,
+                    'triviaTrainingAnswer', 'menubar=no,location=no,resizable=yes,scrollbars=no,status=no, width=500,height=500');
                 return true;
             }
 
-            this.newWindow = window.open(
-                '/teams/remote/' + encodeURI( this.currentAnswer.question ),
+            this.newWindow = window.open( url,
                 'triviaTrainingAnswer');
 
         },

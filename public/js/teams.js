@@ -31903,6 +31903,7 @@ var app = new Vue({
       points: 0
     },
     users: [],
+    remoteUrl: "/teams/remote",
     answerCountdown: {},
     answerCountdownSeconds: 0,
     answerCountdownSecondsDefault: 12,
@@ -31993,12 +31994,15 @@ var app = new Vue({
       this.viewType = "loadingData";
       this.showLoading = true;
       this.columns = [];
+      this.currentAnswer = {};
       axios.get('/newRound/' + roundType).then(function (response) {
         _this.showLoading = false; // return response.data;
 
         _this.columns = response.data;
 
         _this.fixAnswerValue();
+
+        _this.openNewWindow();
 
         _this.viewType = "selectAnswer";
       });
@@ -32018,8 +32022,15 @@ var app = new Vue({
     },
     setupNewRoundView: function setupNewRoundView(columnsData) {},
     givePointsToUser: function givePointsToUser(userIndex) {
-      this.users[userIndex].points += this.currentAnswer.answer_value;
-      this.setupResetAnswerModal();
+      var subtract = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (subtract === false) {
+        this.users[userIndex].points += this.currentAnswer.answer_value;
+        this.setupResetAnswerModal();
+        return;
+      }
+
+      this.users[userIndex].points -= this.currentAnswer.answer_value;
     },
     setupSelectAnswerView: function setupSelectAnswerView() {
       this.setupResetAnswerModal();
@@ -32037,13 +32048,18 @@ var app = new Vue({
       this.showAnswerModal = true;
       this.readingCountdownSeconds = this.readingCountdownSecondsDefault;
     },
+    getRemoteURL: function getRemoteURL() {
+      return this.remoteUrl + "/" + (this.currentAnswer.question === null || this.currentAnswer.question === undefined ? 'Please Move This Window Away from the Shared Screen' : encodeURI(this.currentAnswer.question));
+    },
     openNewWindow: function openNewWindow() {
-      if (this.newWindow === null) {
-        this.newWindow = window.open('/teams/remote/' + encodeURI(this.currentAnswer.question), 'triviaTrainingAnswer', 'menubar=no,location=no,resizable=yes,scrollbars=no,status=no');
+      var url = this.getRemoteURL();
+
+      if (this.newWindow === null || this.newWindow.closed) {
+        this.newWindow = window.open(url, 'triviaTrainingAnswer', 'menubar=no,location=no,resizable=yes,scrollbars=no,status=no, width=500,height=500');
         return true;
       }
 
-      this.newWindow = window.open('/teams/remote/' + encodeURI(this.currentAnswer.question), 'triviaTrainingAnswer');
+      this.newWindow = window.open(url, 'triviaTrainingAnswer');
     },
     setupHideAnswerModalView: function setupHideAnswerModalView() {// Reset everything relating to the answer modal
     },

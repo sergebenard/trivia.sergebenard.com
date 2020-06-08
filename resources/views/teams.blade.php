@@ -24,16 +24,28 @@
                 v-if="viewType != 'showQuestion'"></progress>
             
                 
-            <div class="flex w-full justify-center py-3"
+            <div class="mx-auto py-3 flex flex-wrap"
                 v-if="viewType == 'showQuestion'">
-                <button class="bg-blue-700 flex flex-wrap justify-center items-center px-3 py-2 text-xl text-center text-white
-                    hover:bg-blue-100 hover:text-blue-700"
-                    v-for="(user, userIndex) in users"
-                    v-text="user.name"
-                    v-on:click="givePointsToUser( userIndex )">
-                </button>
-                <button class=" text-indigo-100 bg-indigo-600 px-3 py-2"
-                    v-on:click="setupSelectAnswerView">Continue</button>
+                <div class="grid grid-rows-2 w-32 grid-flow-col gap-0 rounded bg-blue-300 mx-1"
+                        v-for="(user, userIndex) in users">
+                        <div class="row-span-2 flex justify-center items-center"
+                                v-text="user.name">Serge</div>
+                        <button class="flex flex-wrap justify-center items-center px-3- py-2- rounded-tr
+                                        bg-green-300
+                                        text-3xl text-center text-green-600
+                                        hover:bg-green-600 hover:text-green-300"
+                        v-on:click="givePointsToUser( userIndex )">+</button>
+                        <button class="flex flex-wrap justify-center items-center px-3- py-2- rounded-br
+                                        bg-red-300
+                                        text-3xl text-center text-red-600
+                                        hover:bg-red-600 hover:text-red-300"
+                        v-on:click="givePointsToUser( userIndex, true )">-</button>
+                </div>
+
+                <button class=" text-indigo-100 bg-indigo-600 px-3 py-2
+                                rounded
+                                hover:bg-indigo-300 hover:text-indigo-700"
+                        v-on:click="setupSelectAnswerView">Continue</button>
             </div>
             
         </div>
@@ -65,7 +77,7 @@
 
     </div>
 
-    <div class="flex flex-wrap max-w-3xl px-10 mx-auto pt-4">
+    <div class="flex flex-wrap max-w-3xl px-10 mx-auto pt-4 justify-center items-center">
         <div class="bg-blue-700 flex flex-wrap justify-center items-center px-3 py-2"
             v-for="user in users">
             <span class="w-full text-blue-100 text-center"
