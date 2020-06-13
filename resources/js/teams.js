@@ -219,13 +219,16 @@ const app = new Vue({
         },
         
         givePointsToUser: function( userIndex, subtract = false ) {
+            console.debug("In givePointsToUser...");
             if ( subtract === false ) {
+                console.debug("Adding points...");
                 this.users[ userIndex ].points += this.currentAnswer.answer_value;
 
-                this.setupResetAnswerModal();
+                // this.setupResetAnswerModal();
                 return;
             }
             
+            console.debug("Subtracting points...");
             this.users[ userIndex ].points -= this.currentAnswer.answer_value;
             
         },
@@ -495,5 +498,8 @@ const app = new Vue({
             immediate: true // This ensures the watcher is triggered upon creation
         }
 
+    },
+    beforeDestroy: function() {
+        this.newWindow.close();
     }
 });
