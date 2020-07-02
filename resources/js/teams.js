@@ -36,6 +36,8 @@ const app = new Vue({
         newUser: {
             name: "",
             points: 0,
+			correct: 0,
+			wrong: 0,
         },
 
         users: [],
@@ -112,7 +114,10 @@ const app = new Vue({
                 this.users.push( this.newUser );
                 this.newUser = {
                     name: "",
-                    points: 0,
+					points: 0,
+					correct: 0,
+					wrong: 0,
+					currentAnswer: 0,
                 }
             }
         },
@@ -262,7 +267,7 @@ const app = new Vue({
         },
 
         getRemoteURL: function() {
-            return this.remoteUrl + "/" + ( this.currentAnswer.question === null || this.currentAnswer.question === undefined ? 'Please Move This Window Away from the Shared Screen' : encodeURI( this.currentAnswer.question ) );
+            return this.remoteUrl + "/" + ( this.currentAnswer.question === null || this.currentAnswer.question === undefined ? 'Please Move This Window Away from the Shared Screen' : encodeURI( this.currentAnswer.question.replace(/\//g, '\\') ) );
         },
 
         openNewWindow: function() {
